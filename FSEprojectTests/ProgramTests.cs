@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Razor;
 
 namespace FSEproject.Tests
 {
@@ -92,6 +93,19 @@ namespace FSEproject.Tests
             var textTime = Program.GetTextTime(lastSeen);
 
             Assert.AreEqual(expected, textTime);
+        }
+        [TestMethod()]
+        public void CreateOutput_Test_Online()
+        {
+            var user = new UsersData();
+            user.nickname = "Test";
+            user.lastSeenDate = DateTime.Now.AddMinutes(1);
+            string expected = "Test online.";
+            string Language = "eng";
+
+            var output = Program.CreateOutput(user, Language);
+
+            Assert.AreEqual(expected, output);
         }
     }
 }

@@ -21,7 +21,8 @@ namespace FSEproject
                 ["yesterday"] = "yesterday",
                 ["this week"] = "this week",
                 ["a long time ago"] = "a long time ago",
-                ["was online"] = "was online"
+                ["was online"] = "was online",
+                ["online"] = "online"
             },
             ["spa"] = new Dictionary<string, string>
             {
@@ -33,11 +34,12 @@ namespace FSEproject
                 ["yesterday"] = "ayer",
                 ["this week"] = "esta semana",
                 ["a long time ago"] = "hace mucho tiempo",
-                ["was online"] = "estuvo en línea"
+                ["was online"] = "estuvo en línea",
+                ["online"] = "en línea"
             },
             ["ukr"] = new Dictionary<string, string>
             {
-                ["just now"] = "хвильку тому",
+                ["just now"] = "щойно",
                 ["less than a minute ago"] = "менше хвилини тому",
                 ["a couple of minutes ago"] = "декілька хвилин тому",
                 ["an hour ago"] = "годину тому",
@@ -45,7 +47,8 @@ namespace FSEproject
                 ["yesterday"] = "вчора",
                 ["this week"] = "цього тижня",
                 ["a long time ago"] = "дуже давно",
-                ["was online"] = "був онлайн"
+                ["was online"] = "був онлайн",
+                ["online"] = "онлайн"
             },
             ["fre"] = new Dictionary<string, string>
             {
@@ -57,7 +60,8 @@ namespace FSEproject
                 ["yesterday"] = "hier",
                 ["this week"] = "cette semaine",
                 ["a long time ago"] = "il y a longtemps",
-                ["was online"] = "était en ligne"
+                ["was online"] = "était en ligne",
+                ["online"] = "en ligne"
             },
             ["ita"] = new Dictionary<string, string>
             {
@@ -69,14 +73,15 @@ namespace FSEproject
                 ["yesterday"] = "ieri",
                 ["this week"] = "questa settimana",
                 ["a long time ago"] = "molto tempo fa",
-                ["was online"] = "era online"
+                ["was online"] = "era online",
+                ["online"] = "online"
             },
         };
 
         public static string GetTextTime(DateTime lastSeen)
         {
             var timeSpan = DateTime.Now - lastSeen;
-
+            if (timeSpan.TotalSeconds < 1) return "online";
             if (timeSpan.TotalSeconds < 30) return "just now";
             if (timeSpan.TotalSeconds < 60) return "less than a minute ago";
             if (timeSpan.TotalMinutes < 59) return "a couple of minutes ago";
@@ -90,22 +95,22 @@ namespace FSEproject
         {
             if (user.lastSeenDate == null)
                 return $"{user.nickname} {Languages[Language]["was online"]} {Languages[Language]["a long time ago"]}.";
-            else
-                return $"{user.nickname} {Languages[Language]["was online"]} {Languages[Language][GetTextTime((DateTime)user.lastSeenDate)]}.";
+            if (GetTextTime((DateTime)user.lastSeenDate) == "online")
+                return $"{user.nickname} {Languages[Language][GetTextTime((DateTime)user.lastSeenDate)]}.";
+            return $"{user.nickname} {Languages[Language]["was online"]} {Languages[Language][GetTextTime((DateTime)user.lastSeenDate)]}.";
         }
 
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Fetching last seen data...");
             string apiUrl = "https://sef.podkolzin.consulting/api/users/lastSeen?offset=";
             var httpClient = new HttpClient();
             var offset = 0;
             var response = await httpClient.GetStringAsync(apiUrl + offset);
-            Console.WriteLine(response);
+            var usersData = JsonConvert.DeserializeObject<AllData>(response);
+
             Console.WriteLine("Choose the language (eng, spa, ukr, fre, ita)");
             var Language = Console.ReadLine();
             while(Language == null) Language = Console.ReadLine();
-            var usersData = JsonConvert.DeserializeObject<AllData>(response);
             if(usersData == null) return;
             foreach (var user in usersData.data)
             {
