@@ -106,24 +106,29 @@ namespace FSEproject
             while (Language == null) Language = Console.ReadLine();
             return Language;
         }
-        static async Task FetchResponse(int offset, string apiUrl, string Language)
+        static async Task<AllData> FetchResponse(int offset, string apiUrl)
         {
             var httpClient = new HttpClient();
             var response = await httpClient.GetStringAsync(apiUrl + offset);
             var usersData = JsonConvert.DeserializeObject<AllData>(response);
-            if (usersData == null) return;
-            foreach (var user in usersData.data)
-            {
-                Console.WriteLine(CreateOutput(user, Language));
-            }
+            return usersData;
         }
+
         public static async Task GetResponses()
         {
             var Language = GetLanguage();
             string apiUrl = "https://sef.podkolzin.consulting/api/users/lastSeen?offset=";
-            for (int offset = 0; offset < 50; offset++)
+            var offset = 0; 
+            while (true)
             {
-                await FetchResponse(offset, apiUrl, Language);
+                var usersData = await FetchResponse(offset, apiUrl);
+                if (usersData == null) return;
+                foreach (var user in usersData.data)
+                {
+                    Console.WriteLine(CreateOutput(user, Language));
+                }
+                if (usersData.data.Count < 20) return;
+                offset += 20;
             }
         }
     }
