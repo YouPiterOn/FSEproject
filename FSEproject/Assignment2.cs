@@ -127,8 +127,8 @@ namespace FSEproject
                 {
                     Console.WriteLine(CreateOutput(user, Language));
                 }
-                if (usersData.data.Count < 20) return;
-                offset += 20;
+                if (usersData.data.Count == 0) return;
+                offset += usersData.data.Count;
             }
         }
     }
